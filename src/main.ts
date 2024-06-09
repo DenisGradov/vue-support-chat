@@ -1,4 +1,7 @@
 import { createApp } from 'vue'
 import App from './App.vue'
+import supportChat from "@/components/SupportChat.vue";
 
-createApp(App).mount('#app')
+const app = createApp(App)
+app.component('support-chat', supportChat)
+app.mount('#app')

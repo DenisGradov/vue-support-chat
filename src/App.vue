@@ -1,27 +1,28 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js + TypeScript App"/>
+  <div class="wrapper">
+    <support-chat></support-chat>
+  </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
-import HelloWorld from './components/HelloWorld.vue';
-
-export default defineComponent({
-  name: 'App',
-  components: {
-    HelloWorld
-  }
-});
+<script>
+export default {};
 </script>
 
-<style lang="scss">
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+<style lang="scss" scoped>
+.wrapper {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 20, 147, 0.4);
+  /*background-color: #42b983;*/
 }
+</style>
+
+<style>
+  body{
+    font-family: Candara,serif;
+    font-weight: bold;
+  }
 </style>
