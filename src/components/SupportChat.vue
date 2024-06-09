@@ -4,9 +4,21 @@
       <h1 @click="changeChatState" class="header__title">Support</h1>
       <button @click="changeChatState" class="header__buttonForCloseChat">X</button>
     </div>
-    <div ref="chatContent" class="chatContent">
-      <div v-for="message in messages" :class="['message', message.sender]" :key="message.id">
+    <div ref="chatContent" :class="['chatContent',!userName&&'inputName']">
+      <div v-if="!userName">
+        <form @submit.prevent="changeUserName" class="form">
+          <label for="userName">Your name?</label>
+          <div class="inputBlock">
+
+            <input :class="['input',userNameInput.length>=15&&'inputRed']" autocomplete="off" v-model="userNameInput" id="userName" placeholder="Name"/>
+            <span v-show="userNameInput.length>=15" class="inputLimit">{{ userNameInput.length }}/15</span>
+          </div>
+          <button>set name</button>
+        </form>
+      </div>
+      <div v-show="userName" v-for="message in messages" :class="['message', message.sender]" :key="message.id">
         <h2 class="text">{{ message.message }}</h2>
+        <h5 @click="changeName(message.sender)" class="name">{{ userName }}</h5>
         <div class="messageDescription">
           <h5 class="time">{{ displayTimes[message.id] ? displayTimes[message.id] : "now" }}</h5>
           <img v-if="message.seen==='yes'" src="@/assets/seen1.png" alt="seen yes" :class="['seen','seenYes']">
@@ -15,7 +27,7 @@
         </div>
       </div>
     </div>
-    <form @submit.prevent="sendMessage" class="chatInputMessageBlock">
+    <form v-if="userName" @submit.prevent="sendMessage" class="chatInputMessageBlock">
       <input autocomplete="off" v-model="messageInput"
              :class="['chatInputMessageBlock__input',messageInput.length>=150&&'chatInputMessageBlock__inputRed']"
              type="text" name="message"
@@ -48,6 +60,8 @@ import axios from "axios";
 export default {
   data() {
     return {
+      userName: "",
+      userNameInput: "",
       chatOpen: true,
       messages: [],
       messageInput: '',
@@ -59,6 +73,19 @@ export default {
     }
   },
   methods: {
+    changeName(sender) {
+      if (sender === 'visitor') {
+        this.userNameInput = this.userName
+        this.userName = ""
+      }
+    },
+    changeUserName() {
+      if (this.userNameInput.length<=15){
+        this.userName = this.userNameInput;
+        localStorage.setItem('name', this.userNameInput);
+
+      }
+    },
     updateTimes() {
       const updatedTimes = {};
       this.messages.forEach(message => {
@@ -106,6 +133,7 @@ export default {
         id: newMessageId,
         message: this.messageInput,
         sender: "visitor",
+        senderName: this.userName,
         seen: "load",
         time: now
       }
@@ -149,13 +177,13 @@ export default {
         )
         .then((response) => {
           console.log(response.data);
-          if (response.data){
-            if (response.data.messages){
+          if (response.data) {
+            if (response.data.messages) {
               return this.messages = response.data.messages
 
             }
           }
-          this.messages=[]
+          this.messages = []
         })
         .catch((error) => {
           console.error("Error: ", error);
@@ -163,6 +191,10 @@ export default {
         .finally(() => console.log('finally'));
     this.scrollToBottom();
     this.updateTimes()
+    const nameFromLocal = localStorage.getItem('name');
+    if (nameFromLocal) {
+      this.userName = nameFromLocal;
+    }
     this.timer = setInterval(() => {
       if (this.messages) {
         this.updateTimes()
@@ -269,7 +301,23 @@ export default {
 
   }
 
+  .name {
+    position: absolute;
+    right: 5px;
+    top: -10px;
+    color: #42b983;
+
+    transition-duration: .3s;
+    cursor: pointer;
+
+    &:hover {
+      transform: scale(1.1);
+      transition-duration: .3s;
+    }
+  }
+
   .message {
+    position: relative;
     display: flex;
     flex-direction: column;
     width: 70%;
@@ -309,6 +357,77 @@ export default {
 
     &Load {
       animation: spin 2s linear infinite;
+    }
+  }
+}
+
+.inputName {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  .form {
+    display: flex;
+    flex-direction: column;
+    width: 150px;
+
+    label {
+      font-size: 25px;
+      text-align: center;
+    }
+
+    .inputBlock {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      .inputLimit{
+        font-size: 20px;
+        font-weight: bold;
+        color: deeppink;
+      }
+      .input {
+        width: 100%;
+        border-radius: 10px;
+        color: #42b983;
+        font-weight: bold;
+        padding: 10px 3px;
+        font-size: 16px;
+        border: none;
+
+        &Red {
+          color: deeppink;
+        }
+
+        &::placeholder {
+          color: gray;
+        }
+
+        &:focus {
+          outline: none;
+        }
+      }
+
+    }
+
+    button {
+      margin-top: 10px;
+      background-color: #42b983;
+      border-radius: 10px;
+      color: aliceblue;
+      font-weight: bold;
+      font-size: 18px;
+      border: black solid 2px;
+      transition-duration: .3s;
+      cursor: pointer;
+
+      &:hover {
+        transform: scale(1.05);
+        transition-duration: .3s;
+      }
     }
   }
 }
